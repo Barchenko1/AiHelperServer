@@ -1,6 +1,7 @@
 package com.helper.server.controller;
 
 import com.helper.server.process.extension.IExtensionProcess;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,9 @@ public class ExtensionController {
 
     private final IExtensionProcess extensionExecutor;
 
+    @Value(value = "${prompt.3}")
+    private String prompt;
+
     public ExtensionController(IExtensionProcess extensionExecutor) {
         this.extensionExecutor = extensionExecutor;
     }
@@ -22,7 +26,7 @@ public class ExtensionController {
     public ResponseEntity<Void> handle(
             @RequestBody String body,
             @RequestPart(value = "subPrompt", required = false) String subPrompt) {
-        extensionExecutor.execute(body, subPrompt);
+        extensionExecutor.execute(body, prompt);
         return ResponseEntity.ok().build();
     }
 }

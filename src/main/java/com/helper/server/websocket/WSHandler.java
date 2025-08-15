@@ -54,7 +54,12 @@ public class WSHandler extends TextWebSocketHandler {
     public void broadcast(String message) {
         sessions.forEach(s -> {
             if (s.isOpen()) {
-                try { s.sendMessage(new TextMessage(message)); } catch (Exception ignored) {}
+                try {
+                    messageHistory.add(message);
+                    s.sendMessage(new TextMessage(message));
+                } catch (Exception ignored) {
+
+                }
             }
         });
     }

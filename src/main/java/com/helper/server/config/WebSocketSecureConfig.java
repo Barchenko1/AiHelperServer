@@ -55,7 +55,7 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
         public boolean beforeHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
                                        @NonNull WebSocketHandler wsHandler, @NonNull Map<String, Object> attributes) {
             List<String> origins = request.getHeaders().get("Origin");
-            if (origins == null || !origins.contains("http://localhost:3000")) {
+            if (origins == null || !origins.contains("http://192.168.1.22:3000")) {
                 return false;
             }
             List<String> protocolList = request.getHeaders().get("Sec-WebSocket-Protocol");
