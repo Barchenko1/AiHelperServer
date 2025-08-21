@@ -1,6 +1,8 @@
 package com.helper.server.config;
 
 import com.helper.server.websocket.WSHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,8 @@ import java.util.Map;
 @EnableWebSocket
 public class WebSocketSecureConfig implements WebSocketConfigurer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketSecureConfig.class);
+
     private final WSHandler handler;
     private final String webSocketSecret;
 
@@ -34,7 +38,7 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
     public DefaultHandshakeHandler handshakeHandler() {
         return new DefaultHandshakeHandler() {
             private String determineSubProtocol(java.util.List<String> requested, WebSocketHandler handler) {
-                return requested.isEmpty() ? null : requested.get(0);
+                return (requested == null || requested.isEmpty()) ? null : requested.get(0);
             }
         };
     }
@@ -54,10 +58,6 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
         @Override
         public boolean beforeHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
                                        @NonNull WebSocketHandler wsHandler, @NonNull Map<String, Object> attributes) {
-            List<String> origins = request.getHeaders().get("Origin");
-            if (origins == null || !origins.contains("http://192.168.1.22:3000")) {
-                return false;
-            }
             List<String> protocolList = request.getHeaders().get("Sec-WebSocket-Protocol");
             String token = (protocolList != null && !protocolList.isEmpty()) ? protocolList.get(0) : null;
 
@@ -74,7 +74,6 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
         @Override
         public void afterHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
                                    @NonNull WebSocketHandler wsHandler, Exception ex) {
-            String text = "";
         }
 
         boolean validateToken(String token) {

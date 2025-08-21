@@ -1,13 +1,13 @@
 package com.helper.server.controller;
 
 import com.helper.server.process.voice.IVoiceCutterProcess;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -19,11 +19,17 @@ public class VoiceController {
         this.voiceCutterProcess = voiceCutterProcess;
     }
 
+    @PostMapping(value = "/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> handleVoice(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "subPrompt", required = false) String subPrompt
+    ) {
+        if (!"audio/wav".equalsIgnoreCase(file.getContentType())
+                && !"audio/x-wav".equalsIgnoreCase(file.getContentType())) {
+            return ResponseEntity.badRequest().build();
+        }
 
-    @PostMapping("/voice")
-    public ResponseEntity<Void> handle(@RequestBody String body,
-                                       @RequestPart(value = "subPrompt", required = false) String subPrompt) {
-        voiceCutterProcess.execute(body, subPrompt);
+        voiceCutterProcess.execute(file, subPrompt);
         return ResponseEntity.ok().build();
     }
 }

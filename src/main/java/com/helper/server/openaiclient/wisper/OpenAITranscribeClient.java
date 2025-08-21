@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,9 +25,9 @@ import java.util.Optional;
 public class OpenAITranscribeClient implements IOpenAITranscribeClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAITranscribeClient.class);
-    @Value(value = "OPENAI_API_KEY")
-    private String openAiApiKey;
-    @Value(value = "openai.api.url.transcriptions")
+    @Value(value = "${OPEN_AI_API_KEY}")
+    protected String openAiApiKey;
+    @Value(value = "${openai.api.url.transcriptions}")
     private String transcriptionApiUrl;
 
     @Override
@@ -101,6 +103,69 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
             return null;
         } finally {
             if (conn != null) conn.disconnect();
+        }
+    }
+
+    @Override
+    public String transcribeWithOpenAI(File file) {
+        try {
+            String boundary = "----OpenAIFormBoundary" + System.currentTimeMillis();
+
+            URL url = new URL(transcriptionApiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + openAiApiKey);
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            try (OutputStream out = conn.getOutputStream();
+                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8), true)) {
+
+                // file part
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n");
+                writer.append("Content-Type: audio/wav\r\n\r\n").flush();
+                try (FileInputStream inputStream = new FileInputStream(file)) {
+                    inputStream.transferTo(out);
+                }
+                out.flush();
+                writer.append("\r\n").flush();
+
+                // model param
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n");
+                writer.append("whisper-1").append("\r\n").flush();
+
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n");
+                writer.append("en").append("\r\n").flush();
+
+                // close boundary
+                writer.append("--").append(boundary).append("--").append("\r\n").flush();
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    return JsonParser
+                            .parseString(response.toString())
+                            .getAsJsonObject()
+                            .get("text")
+                            .getAsString();
+                }
+            } else {
+                LOGGER.error("❌ OpenAI API failed: {}", responseCode);
+                return null;
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("❌ Error sending to OpenAI: {}", e.getMessage());
+            return null;
         }
     }
 }
