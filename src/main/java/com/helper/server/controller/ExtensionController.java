@@ -15,7 +15,7 @@ public class ExtensionController {
 
     private final IExtensionProcess extensionExecutor;
 
-    @Value(value = "${prompt.3}")
+    @Value(value = "${prompt.1}")
     private String prompt;
 
     public ExtensionController(IExtensionProcess extensionExecutor) {
