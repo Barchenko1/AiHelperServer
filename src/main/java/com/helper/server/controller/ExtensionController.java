@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -23,10 +24,18 @@ public class ExtensionController {
     }
 
     @PostMapping(value = "/text")
-    public ResponseEntity<Void> handle(
+    public ResponseEntity<Void> handleText(
             @RequestBody String body,
             @RequestPart(value = "subPrompt", required = false) String subPrompt) {
-        extensionExecutor.execute(body, prompt);
+        extensionExecutor.executeText(body, prompt);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/canvas")
+    public ResponseEntity<Void> handleCanvasTag(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "subPrompt", required = false) String subPrompt) {
+        extensionExecutor.executeCanvasTag(file, prompt);
         return ResponseEntity.ok().build();
     }
 }
