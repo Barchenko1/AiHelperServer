@@ -1,4 +1,4 @@
-package com.helper.server.controller;
+package com.helper.server.rest;
 
 import com.helper.server.process.extension.IExtensionProcess;
 import org.springframework.beans.factory.annotation.Value;

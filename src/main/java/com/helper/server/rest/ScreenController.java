@@ -1,4 +1,4 @@
-package com.helper.server.controller;
+package com.helper.server.rest;
 
 import com.helper.server.process.screenshot.IScreenshotProcess;
 import org.springframework.http.MediaType;

@@ -1,4 +1,4 @@
-package com.helper.server.controller;
+package com.helper.server.rest;
 
 import com.helper.server.process.voice.IVoiceCutterProcess;
 import org.springframework.http.MediaType;
