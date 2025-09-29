@@ -35,53 +35,48 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bootJar --no-daemon
 
+      - name: Debug build output
+        run: ls -R build/libs
 
-      - name: Debug Maven Build Output
-        run: ls -R target
-
-      - name: Check for Artifacts
+      - name: Check for artifacts
         run: |
-          if [ ! -f target/*.jar ]; then
-            echo "Error: No artifacts found in target directory."
+          shopt -s nullglob
+          files=(build/libs/*.jar)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "Error: No artifacts found in build/libs/"
             exit 1
           fi
+          printf 'Found: %s\n' "${files[@]}"
 
-      - name: Archive production artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: packaged-application
-          path: target/*.jar
+          path: build/libs/*.jar
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: packaged-application
-          path: target/
-
-      - name: Setup key
-        id: setup-key
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-        run: |
-          echo "$DEPLOY_KEY" >> $HOME/key.pem
-          chmod 400 $HOME/key.pem
+          path: artifact/
 
       - name: Copy JAR to EC2
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ec2-user
-          key: ${{ secrets.DEPLOY_KEY }}
-          source: "target/*.jar"
+          key: ${{ secrets.DEPLOY_KEY }}   # private key content from secret
+          source: "artifact/*.jar"
           target: "/home/ec2-user/deployment/"
 
-      - name: Connect SSH and Restart Services
+      - name: Restart service
         run: |
-          ssh -o StrictHostKeyChecking=no -i $HOME/key.pem ec2-user@${{ secrets.DEPLOY_HOST }} '
-            sudo systemctl restart spring-boot-app
-          '
+          echo "${{ secrets.DEPLOY_KEY }}" > key.pem
+          chmod 400 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.DEPLOY_HOST }} \
+            'sudo systemctl restart spring-boot-app'
