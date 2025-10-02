@@ -1,5 +1,7 @@
 package com.helper.server.service.text;
 
+import com.helper.server.entity.ExtensionPayload;
+
 public interface ITextService {
-    void sendText(String payload, String subPrompt);
+    void sendText(ExtensionPayload payload);
 }

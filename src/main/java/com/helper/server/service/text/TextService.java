@@ -1,6 +1,8 @@
 package com.helper.server.service.text;
 
+import com.helper.server.entity.ExtensionPayload;
 import com.helper.server.openaiclient.IOpenAIClient;
+import com.helper.server.service.AbstractService;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
@@ -9,36 +11,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import static com.helper.server.unil.Constant.TEXT_REQ;
+import static com.helper.server.unil.Constant.LANGUAGE_TEXT;
 
 @Service
-public class TextService implements ITextService {
+public class TextService extends AbstractService implements ITextService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TextService.class);
-
-    private final IOpenAIClient openAIClient;
-    private final IJsonTemplateService jsonTemplateService;
-    private final WSHandler wsHandler;
 
     @Autowired
     public TextService(@Qualifier("openAITextClient") IOpenAIClient openAIClient,
                             IJsonTemplateService jsonTemplateService,
                             WSHandler wsHandler) {
-        this.openAIClient = openAIClient;
-        this.jsonTemplateService = jsonTemplateService;
-        this.wsHandler = wsHandler;
+        super(openAIClient, jsonTemplateService, wsHandler);
     }
 
     @Override
-    public void sendText(String payload, String subPrompt) {
-        String subPayload = payload.substring(0, 50) + "...";
+    public void sendText(ExtensionPayload payload) {
+        String subPayload = payload.getText().substring(0, 50) + "...";
 
         LOGGER.info("Received from extension: {}", subPayload);
         long handle3 = System.currentTimeMillis();
-        String sanitizedBody = payload
+        String sanitizedBody = payload.getText()
                 .replaceAll("\\s+", " ")
                 .replace("\"", "\\\"");
-        String jsonPayload = jsonTemplateService.buildJsonPayload(TEXT_REQ, sanitizedBody, subPrompt);
+        String completePrompt = payload.getPrompt() + " " + LANGUAGE_TEXT.formatted(payload.getLanguage());
+        String jsonPayload = jsonTemplateService.buildJsonTextPayload(sanitizedBody, completePrompt);
         String response = openAIClient.sendToOpenAI(jsonPayload);
         long timeDiff3 = System.currentTimeMillis() - handle3;
         LOGGER.info("time gets response {}", timeDiff3);

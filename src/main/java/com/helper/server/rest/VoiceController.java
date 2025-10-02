@@ -22,14 +22,14 @@ public class VoiceController {
     @PostMapping(value = "/voice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> handleVoice(
             @RequestPart("file") MultipartFile file,
-            @RequestPart(value = "subPrompt", required = false) String subPrompt
+            @RequestPart(value = "prompt", required = false) String prompt
     ) {
         if (!"audio/wav".equalsIgnoreCase(file.getContentType())
                 && !"audio/x-wav".equalsIgnoreCase(file.getContentType())) {
             return ResponseEntity.badRequest().build();
         }
 
-        voiceCutterProcess.execute(file, subPrompt);
+        voiceCutterProcess.execute(file, prompt);
         return ResponseEntity.ok().build();
     }
 }

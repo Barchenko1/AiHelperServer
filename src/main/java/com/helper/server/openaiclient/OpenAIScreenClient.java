@@ -1,6 +1,5 @@
 package com.helper.server.openaiclient;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import java.net.HttpURLConnection;
 
 @Service("openAIScreenClient")
 public class OpenAIScreenClient extends AbstractOpenAiClient {
-    private static final Gson GSON = new Gson();
 
     public OpenAIScreenClient() {}
 
@@ -33,13 +31,13 @@ public class OpenAIScreenClient extends AbstractOpenAiClient {
 
             JsonObject jsonResponse = JsonParser.parseReader(new InputStreamReader(responseStream)).getAsJsonObject();
 
+            jsonResponse.addProperty("timestamp", System.currentTimeMillis());
+
             String content = jsonResponse
                     .getAsJsonArray("choices")
                     .get(0).getAsJsonObject()
                     .getAsJsonObject("message")
                     .get("content").getAsString();
-
-            jsonResponse.addProperty("timestamp", System.currentTimeMillis());
 
             return GSON.toJson(content);
         } catch (IOException e) {

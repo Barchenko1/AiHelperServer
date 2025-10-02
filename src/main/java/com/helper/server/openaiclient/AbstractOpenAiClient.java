@@ -1,5 +1,6 @@
 package com.helper.server.openaiclient;
 
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ public abstract class AbstractOpenAiClient implements IOpenAIClient {
 
     @Value(value = "${openai.api.url.completions}")
     protected String completionsApiUrl;
+
+    protected static final Gson GSON = new Gson();
 
     protected HttpURLConnection getURLConnection() {
         HttpURLConnection connection;

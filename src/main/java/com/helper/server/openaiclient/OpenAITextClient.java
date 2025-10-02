@@ -31,11 +31,16 @@ public class OpenAITextClient extends AbstractOpenAiClient {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-                JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-                return jsonObject.getAsJsonArray("choices")
+                JsonObject jsonResponse = JsonParser.parseString(response.toString()).getAsJsonObject();
+                jsonResponse.addProperty("timestamp", System.currentTimeMillis());
+
+                String content = jsonResponse
+                        .getAsJsonArray("choices")
                         .get(0).getAsJsonObject()
                         .getAsJsonObject("message")
-                        .get("content").getAsString().trim();
+                        .get("content").getAsString();
+
+                return GSON.toJson(content);
             }
         } catch (Exception e) {
             LOGGER.error("❌ Error sending to GPT: {}", e.getMessage());

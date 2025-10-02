@@ -16,13 +16,10 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VoiceCutterProcess.class);
 
-    private static final String TEXT_REQ = "/templates/textRequest.json";
-
     private final IOpenAITranscribeClient transcribeClient;
     private final IJsonTemplateService jsonTemplateService;
     private final IOpenAIClient openAIClient;
     private final WSHandler wsHandler;
-
 
     @Autowired
     public VoiceCutterProcess(IOpenAITranscribeClient transcribeClient,
@@ -35,27 +32,32 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
         this.wsHandler = wsHandler;
     }
 
-    private void sendToOpenAITranscript(MultipartFile multipartFile, String subPrompt) {
+    @Override
+    public void execute(MultipartFile file, String prompt) {
+        if (file == null) {
+            wsHandler.broadcast("No voice file provided");
+        } else {
+            wsHandler.broadcast("Processing...");
+            sendToOpenAITranscript(file, prompt);
+        }
+    }
+
+    private void sendToOpenAITranscript(MultipartFile multipartFile, String prompt) {
         String transcript = transcribeClient.transcribeWithOpenAI(multipartFile);
-        sendToOpenAI(transcript, subPrompt);
+        sendToOpenAI(transcript, prompt);
 
     }
 
-    private void sendToOpenAI(String transcript, String subPrompt) {
+    private void sendToOpenAI(String transcript, String prompt) {
         if (transcript != null && !transcript.isEmpty()) {
             LOGGER.info("✅ Final Transcript: {}", transcript);
-            String jsonPayload = jsonTemplateService.buildJsonPayload(TEXT_REQ, transcript, subPrompt);
+            String jsonPayload = jsonTemplateService.buildJsonTextPayload(transcript, prompt);
             LOGGER.info(jsonPayload);
             String response = openAIClient.sendToOpenAI(jsonPayload);
             wsHandler.broadcast(response);
         } else {
             LOGGER.info("⚠️ No speech detected.");
         }
-    }
-
-    @Override
-    public void execute(MultipartFile file, String subPrompt) {
-        sendToOpenAITranscript(file, subPrompt);
     }
 
 }
