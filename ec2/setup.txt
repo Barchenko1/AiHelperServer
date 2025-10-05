@@ -1,0 +1,27 @@
+# /etc/systemd/system/AiHelperServer.service
+[Unit]
+Description=Spring Boot App
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/deployment/artifact
+ExecStart=/usr/bin/java -jar /home/ec2-user/deployment/artifact/app.jar
+Restart=always
+RestartSec=5
+SuccessExitStatus=143
+# Secrets and profile are injected by the drop-in:
+# /etc/systemd/system/AiHelperServer.service.d/override.conf
+
+[Install]
+WantedBy=multi-user.target
+
+
+//
+sudo systemctl daemon-reload
+sudo systemctl enable AiHelperServer
+sudo systemctl restart AiHelperServer
+sudo systemctl status AiHelperServer -l --no-pager
+
+//
+journalctl -u AiHelperServer -b -n 200 --no-pager
