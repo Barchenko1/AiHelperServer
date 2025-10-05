@@ -70,35 +70,61 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ec2-user
-          key: ${{ secrets.DEPLOY_KEY }}   # private key content from secret
+          key: ${{ secrets.DEPLOY_KEY }}
           source: "artifact/*.jar"
-          target: "/home/ec2-user/deployment/"
+          target: "/home/ec2-user/deployment/artifact/"
 
-      - name: Activate JAR name
+      - name: Activate JAR name (update symlink)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ec2-user
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            set -e
-            cd /home/ec2-user/deployment
-            # pick the first/only jar and move to the expected name
-            LATEST_JAR=$(ls -t *.jar | head -n 1)
+            set -Eeuo pipefail
+
+            BASE_DIR=/home/ec2-user/deployment
+            ART_DIR="$BASE_DIR/artifact"
+            APP_LINK="$BASE_DIR/spring-boot-app.jar"
+
+            mkdir -p "$ART_DIR"
+            cd "$BASE_DIR"
+
+            # pick newest jar from artifact folder
+            LATEST_JAR=$(ls -t "$ART_DIR"/*.jar | head -n 1)
+            if [ -z "${LATEST_JAR:-}" ]; then
+              echo "No JARs found in $ART_DIR"
+              exit 1
+            fi
+
             echo "Activating: ${LATEST_JAR}"
-            sudo chown ec2-user:ec2-user "$LATEST_JAR"
+            chown ec2-user:ec2-user "$LATEST_JAR"
             chmod 0644 "$LATEST_JAR"
 
-            # write/update env file (adjust secrets as needed)
+            # atomically update symlink spring-boot-app.jar -> artifact/<versioned>.jar
+            ln -sfn "$LATEST_JAR" "$APP_LINK"
+            chown -h ec2-user:ec2-user "$APP_LINK"
+
+            # write/update env file
+            sudo install -d -m 0755 /etc
             sudo bash -c 'cat > /etc/spring-boot-app.env <<EOF
             APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
             APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
             OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
             EOF'
+            sudo chmod 0640 /etc/spring-boot-app.env
+  
+            # ensure service file exists and daemon knows it
+            if [ ! -f /etc/systemd/system/spring-boot-app.service ]; then
+          echo "WARNING: /etc/systemd/system/spring-boot-app.service not found."
+            echo "Create it per the snippet in the next section."
+            else
+            sudo systemctl daemon-reload
+            fi
 
       - name: Restart service
         run: |
           echo "${{ secrets.DEPLOY_KEY }}" > key.pem
           chmod 400 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.DEPLOY_HOST }} \
-            'sudo systemctl restart spring-boot-app'
+            'sudo systemctl restart spring-boot-app && sudo systemctl status --no-pager -l spring-boot-app'
