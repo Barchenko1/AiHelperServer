@@ -116,7 +116,7 @@ jobs:
   
             # ensure service file exists and daemon knows it
             if [ ! -f /etc/systemd/system/spring-boot-app.service ]; then
-          echo "WARNING: /etc/systemd/system/spring-boot-app.service not found."
+            echo "WARNING: /etc/systemd/system/spring-boot-app.service not found."
             echo "Create it per the snippet in the next section."
             else
             sudo systemctl daemon-reload
