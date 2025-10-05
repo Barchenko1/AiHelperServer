@@ -78,7 +78,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ec2-user
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "artifact/*.jar"
+          source: "build/libs/*.jar"
           target: "/home/ec2-user/deployment/"
 
       - name: Write env file on EC2
