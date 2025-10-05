@@ -1,0 +1,67 @@
+name: CI/CD Spring Boot → EC2
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build JAR
+        run: ./gradlew clean bootJar --no-daemon
+
+      - name: Find built JAR
+        id: jar
+        run: |
+          JAR_PATH=$(ls -1 build/libs/*-SNAPSHOT.jar 2>/dev/null || true)
+          if [ -z "$JAR_PATH" ]; then
+            JAR_PATH=$(ls -1 build/libs/*.jar | head -n1)
+          fi
+          echo "jar=$JAR_PATH" >> "$GITHUB_OUTPUT"
+          echo "Found: $JAR_PATH"
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Copy JAR to EC2
+        run: |
+          REMOTE_DIR="/home/${{ secrets.EC2_USER }}/deployment/artifact"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p $REMOTE_DIR && sudo chown ${{ secrets.EC2_USER }}:$${USER:-$USER} $REMOTE_DIR || true"
+          scp -i ~/.ssh/id_rsa "${{ steps.jar.outputs.jar }}" ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:$REMOTE_DIR/app.jar.tmp
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mv $REMOTE_DIR/app.jar.tmp $REMOTE_DIR/app.jar"
+
+      - name: Restart service on EC2
+        run: |
+          SERVICE="AiHelperServer"            # <-- change to your systemd unit (without .service)
+          REMOTE_DIR="/home/${{ secrets.EC2_USER }}/deployment/artifact"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "\
+            sudo systemctl stop ${SERVICE}.service || true && \
+            sudo systemctl daemon-reload || true && \
+            sudo systemctl start ${SERVICE}.service && \
+            sudo systemctl status ${SERVICE}.service --no-pager -l \
+          "
