@@ -82,6 +82,23 @@ jobs:
           source: "artifact/*.jar"
           target: "/home/ec2-user/deployment/"
 
+      - name: Write env file on EC2
+        run: |
+            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" ec2-user@${{ secrets.DEPLOY_HOST }} "sudo bash -s" <<'REMOTE'
+            set -Eeuo pipefail
+            install -d -m 0755 /etc
+            # Create/update /etc/AiHelperServer.env with strict perms
+            umask 137  # results in 0640 for created files via redirection
+            cat > /tmp/AiHelperServer.env <<'EOF_ENV'
+            APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
+            APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
+            OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
+            EOF_ENV
+            sudo mv /tmp/AiHelperServer.env /etc/AiHelperServer.env
+            sudo chown root:ec2-user /etc/AiHelperServer.env
+            sudo chmod 0640 /etc/AiHelperServer.env
+            REMOTE
+
 #      - name: Activate JAR name (update symlink)
 #        uses: appleboy/ssh-action@v0.1.10
 #        with:
@@ -133,4 +150,4 @@ jobs:
       - name: Connect SSH and Restart Services
         run: |
           ssh -o StrictHostKeyChecking=no -i $HOME/key.pem ec2-user@${{ secrets.DEPLOY_HOST }} '
-            sudo systemctl restart spring-boot-app
+            sudo systemctl restart AiHelperServer
