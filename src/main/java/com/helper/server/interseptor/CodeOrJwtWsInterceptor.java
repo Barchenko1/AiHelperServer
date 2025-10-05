@@ -1,6 +1,5 @@
 package com.helper.server.interseptor;
 
-import com.helper.server.util.CodeToTokenService;
 import com.helper.server.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -16,10 +15,9 @@ import java.util.Map;
 @Service
 public class CodeOrJwtWsInterceptor implements HandshakeInterceptor {
     private final JwtUtil jwt;
-    private final CodeToTokenService codeToTokenService;
 
-    public CodeOrJwtWsInterceptor(JwtUtil jwt, CodeToTokenService codeToTokenService) {
-        this.jwt = jwt; this.codeToTokenService = codeToTokenService;
+    public CodeOrJwtWsInterceptor(JwtUtil jwt) {
+        this.jwt = jwt;
     }
 
     @Override

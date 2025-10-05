@@ -74,6 +74,27 @@ jobs:
           source: "artifact/*.jar"
           target: "/home/ec2-user/deployment/"
 
+      - name: Activate JAR name
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ec2-user
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -e
+            cd /home/ec2-user/deployment
+            # pick the first/only jar and move to the expected name
+            LATEST_JAR=$(ls -t *.jar | head -n 1)
+            mv -f "$LATEST_JAR" spring-boot-app.jar
+            sudo chown ec2-user:ec2-user spring-boot-app.jar
+
+            # write/update env file (adjust secrets as needed)
+            sudo bash -c 'cat > /etc/spring-boot-app.env <<EOF
+            APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
+            APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            EOF'
+
       - name: Restart service
         run: |
           echo "${{ secrets.DEPLOY_KEY }}" > key.pem

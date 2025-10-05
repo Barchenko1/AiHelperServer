@@ -2,7 +2,6 @@ package com.helper.server.config;
 
 import com.helper.server.interseptor.CodeOrJwtWsInterceptor;
 import com.helper.server.util.JwtUtil;
-import com.helper.server.util.CodeToTokenService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,20 +18,17 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
 
     private final WSHandler handler;
     private final JwtUtil jwtUtil;
-    private final CodeToTokenService codeToTokenService;
 
     public WebSocketSecureConfig(WSHandler handler,
-                                 JwtUtil jwtUtil,
-                                 CodeToTokenService codeToTokenService) {
+                                 JwtUtil jwtUtil) {
         this.handler = handler;
         this.jwtUtil = jwtUtil;
-        this.codeToTokenService = codeToTokenService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(handler, "/ws")
-                .addInterceptors(new CodeOrJwtWsInterceptor(jwtUtil, codeToTokenService))
+                .addInterceptors(new CodeOrJwtWsInterceptor(jwtUtil))
                 .setAllowedOriginPatterns("*");
     }
 }

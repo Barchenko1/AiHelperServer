@@ -19,7 +19,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -77,7 +76,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService users(@Value(value = "${app.secret.noop}") String noop, PasswordEncoder encoder) {
+    public UserDetailsService users(@Value(value = "${APP_NOOP_SECRET}") String noop, PasswordEncoder encoder) {
         InMemoryUserDetailsManager uds = new InMemoryUserDetailsManager();
         uds.createUser(User.withUsername("pbrchnk")
                 .password(encoder.encode("pbrchnk" + noop))
