@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: packaged-application
-          path: build/libs/*.jar
+          path: artifact/*.jar
 
   deploy:
     needs: build
