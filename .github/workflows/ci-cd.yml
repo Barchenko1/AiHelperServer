@@ -44,22 +44,22 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Copy JAR to EC2
         run: |
-          REMOTE_DIR="/home/${{ secrets.EC2_USER }}/deployment/artifact"
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p $REMOTE_DIR && sudo chown ${{ secrets.EC2_USER }}:$${USER:-$USER} $REMOTE_DIR || true"
-          scp -i ~/.ssh/id_rsa "${{ steps.jar.outputs.jar }}" ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:$REMOTE_DIR/app.jar.tmp
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mv $REMOTE_DIR/app.jar.tmp $REMOTE_DIR/app.jar"
+          REMOTE_DIR="/home/ec2-user/deployment/artifact"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes ec2-user@${{ secrets.DEPLOY_HOST }} "mkdir -p $REMOTE_DIR && sudo chown ec2-user:$${USER:-$USER} $REMOTE_DIR || true"
+          scp -i ~/.ssh/id_rsa "${{ steps.jar.outputs.jar }}" ec2-user@${{ secrets.DEPLOY_HOST }}:$REMOTE_DIR/app.jar.tmp
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "mv $REMOTE_DIR/app.jar.tmp $REMOTE_DIR/app.jar"
 
       - name: Restart service on EC2
         run: |
           SERVICE="AiHelperServer"            # <-- change to your systemd unit (without .service)
-          REMOTE_DIR="/home/${{ secrets.EC2_USER }}/deployment/artifact"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "\
+          REMOTE_DIR="/home/ec2-user/deployment/artifact"
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "\
             sudo systemctl stop ${SERVICE}.service || true && \
             sudo systemctl daemon-reload || true && \
             sudo systemctl start ${SERVICE}.service && \
