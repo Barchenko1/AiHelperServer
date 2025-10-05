@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ExtensionController {
@@ -23,16 +25,18 @@ public class ExtensionController {
     }
 
     @PostMapping(value = "/text", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> handleText(@RequestBody final ExtensionPayload payload) {
-        extensionExecutor.executeText(payload);
+    public ResponseEntity<Void> handleText(@RequestBody final ExtensionPayload payload,
+                                           Principal principal) {
+        extensionExecutor.executeText(principal, payload);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/canvas", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> handleCanvasTag(
             @RequestPart("file") final MultipartFile file,
-            @RequestPart("payload") final ExtensionPayload payload) {
-        extensionExecutor.executeCanvasTag(payload, file);
+            @RequestPart("payload") final ExtensionPayload payload,
+            Principal principal) {
+        extensionExecutor.executeCanvasTag(principal, payload, file);
         return ResponseEntity.ok().build();
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @Service
 public class VoiceCutterProcess implements IVoiceCutterProcess {
 
@@ -33,28 +35,28 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
     }
 
     @Override
-    public void execute(MultipartFile file, String prompt) {
+    public void execute(Principal principal, MultipartFile file, String prompt) {
         if (file == null) {
-            wsHandler.broadcast("No voice file provided");
+            wsHandler.broadcastToUser(principal.getName(), "No voice file provided");
         } else {
-            wsHandler.broadcast("Processing...");
-            sendToOpenAITranscript(file, prompt);
+            wsHandler.broadcastToUser(principal.getName(),"Processing...");
+            sendToOpenAITranscript(principal, file, prompt);
         }
     }
 
-    private void sendToOpenAITranscript(MultipartFile multipartFile, String prompt) {
+    private void sendToOpenAITranscript(Principal principal, MultipartFile multipartFile, String prompt) {
         String transcript = transcribeClient.transcribeWithOpenAI(multipartFile);
-        sendToOpenAI(transcript, prompt);
+        sendToOpenAI(principal, transcript, prompt);
 
     }
 
-    private void sendToOpenAI(String transcript, String prompt) {
+    private void sendToOpenAI(Principal principal, String transcript, String prompt) {
         if (transcript != null && !transcript.isEmpty()) {
             LOGGER.info("✅ Final Transcript: {}", transcript);
             String jsonPayload = jsonTemplateService.buildJsonTextPayload(transcript, prompt);
             LOGGER.info(jsonPayload);
             String response = openAIClient.sendToOpenAI(jsonPayload);
-            wsHandler.broadcast(response);
+            wsHandler.broadcastToUser(principal.getName(), response);
         } else {
             LOGGER.info("⚠️ No speech detected.");
         }

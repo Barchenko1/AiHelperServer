@@ -34,13 +34,11 @@ public class JsonTemplateService implements IJsonTemplateService {
     private JsonObject buildTextJsonObject(String payload, String prompt) {
         JsonArray content = new JsonArray();
 
-        // text block
         JsonObject transcriptObject = new JsonObject();
         transcriptObject.addProperty("type", "text");
         transcriptObject.addProperty("text", payload == null ? "" : payload);
         content.add(transcriptObject);
 
-        // text block
         JsonObject text = new JsonObject();
         text.addProperty("type", "text");
         text.addProperty("text", prompt == null ? "" : prompt);
@@ -52,13 +50,11 @@ public class JsonTemplateService implements IJsonTemplateService {
     private JsonObject buildImageJsonObject(List<String> base64Files, String prompt) {
         JsonArray content = new JsonArray();
 
-        // text block
         JsonObject text = new JsonObject();
         text.addProperty("type", "text");
         text.addProperty("text", prompt == null ? "" : prompt);
         content.add(text);
 
-        // image blocks
         for (String url : base64Files) {
             if (url == null || url.isBlank()) continue;
             JsonObject img = new JsonObject();

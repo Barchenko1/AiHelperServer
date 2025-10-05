@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @Service
 public class ExtensionProcess extends AbstractProcess implements IExtensionProcess {
 
@@ -29,16 +31,16 @@ public class ExtensionProcess extends AbstractProcess implements IExtensionProce
     }
 
     @Override
-    public void executeText(ExtensionPayload payload) {
-        wsHandler.broadcast("Processing...");
-        textService.sendText(payload);
+    public void executeText(Principal principal, ExtensionPayload payload) {
+        wsHandler.broadcastToUser(principal.getName(), "Processing...");
+        textService.sendText(principal, payload);
     }
 
     @Override
-    public void executeCanvasTag(ExtensionPayload payload, MultipartFile file) {
-        wsHandler.broadcast("Processing...");
+    public void executeCanvasTag(Principal principal,ExtensionPayload payload, MultipartFile file) {
+        wsHandler.broadcastToUser(principal.getName(), "Processing...");
         String filePayload = fileTransform.getFilePayload(file);
         payload.setText(filePayload);
-        textService.sendText(payload);
+        textService.sendText(principal, payload);
     }
 }

@@ -54,7 +54,6 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
 
                 final String CRLF = "\r\n";
 
-                // --- file part ---
                 writer.append("--").append(boundary).append(CRLF);
                 writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"")
                         .append(filename).append("\"").append(CRLF);
@@ -65,17 +64,14 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
                 out.flush();
                 writer.append(CRLF).flush();
 
-                // --- model ---
                 writer.append("--").append(boundary).append(CRLF);
                 writer.append("Content-Disposition: form-data; name=\"model\"").append(CRLF).append(CRLF);
                 writer.append("whisper-1").append(CRLF).flush();
 
-                // --- language (optional; set as needed) ---
                 writer.append("--").append(boundary).append(CRLF);
                 writer.append("Content-Disposition: form-data; name=\"language\"").append(CRLF).append(CRLF);
                 writer.append("en").append(CRLF).flush();
 
-                // --- close ---
                 writer.append("--").append(boundary).append("--").append(CRLF).flush();
             }
 
@@ -121,7 +117,6 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
             try (OutputStream out = conn.getOutputStream();
                  PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8), true)) {
 
-                // file part
                 writer.append("--").append(boundary).append("\r\n");
                 writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n");
                 writer.append("Content-Type: audio/wav\r\n\r\n").flush();
@@ -131,7 +126,6 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
                 out.flush();
                 writer.append("\r\n").flush();
 
-                // model param
                 writer.append("--").append(boundary).append("\r\n");
                 writer.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n");
                 writer.append("whisper-1").append("\r\n").flush();
@@ -140,7 +134,6 @@ public class OpenAITranscribeClient implements IOpenAITranscribeClient {
                 writer.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n");
                 writer.append("en").append("\r\n").flush();
 
-                // close boundary
                 writer.append("--").append(boundary).append("--").append("\r\n").flush();
             }
 

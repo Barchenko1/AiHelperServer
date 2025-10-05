@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
 
 @Service
@@ -25,22 +26,22 @@ public class ScreenshotProcess extends AbstractProcess implements IScreenshotPro
     }
 
     @Override
-    public void execute(MultipartFile file, String prompt) {
+    public void execute(MultipartFile file, String prompt, Principal principal) {
         if (file == null) {
-            wsHandler.broadcast("Commit folder is empty");
+            wsHandler.broadcastToUser(principal.getName(), "Commit folder is empty");
         } else {
-            wsHandler.broadcast("Processing...");
-            fileService.sendFile(file, prompt);
+            wsHandler.broadcastToUser(principal.getName(), "Processing...");
+            fileService.sendFile(principal, file, prompt);
         }
     }
 
     @Override
-    public void execute(List<MultipartFile> files, String prompt) {
+    public void execute(List<MultipartFile> files, String prompt, Principal principal) {
         if (files == null || files.isEmpty()) {
-            wsHandler.broadcast("Commit folder is empty");
+            wsHandler.broadcastToUser(principal.getName(), "Commit folder is empty");
         } else {
-            wsHandler.broadcast("Processing...");
-            fileService.sendFiles(files, prompt);
+            wsHandler.broadcastToUser(principal.getName(), "Processing...");
+            fileService.sendFiles(principal, files, prompt);
         }
     }
 

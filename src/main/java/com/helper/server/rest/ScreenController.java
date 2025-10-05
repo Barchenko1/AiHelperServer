@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -22,19 +23,20 @@ public class ScreenController {
     }
 
     @PostMapping(value = "/screen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> handle(
+    public ResponseEntity<Void> screen(
             @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart(value = "prompt", required = false) String prompt) {
-        screenshotProcess.execute(file, prompt);
+            @RequestPart(value = "prompt", required = false) String prompt,
+            Principal principal) {
+        screenshotProcess.execute(file, prompt, principal);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(path = "/screens", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> screen(
+    public ResponseEntity<Void> screens(
             @RequestPart(name = "files", required = false) List<MultipartFile> files,
-            @RequestPart(name = "prompt", required = false) String prompt) {
-
-        screenshotProcess.execute(files, prompt);
+            @RequestPart(name = "prompt", required = false) String prompt,
+            Principal principal) {
+        screenshotProcess.execute(files, prompt, principal);
         return ResponseEntity.ok().build();
     }
 }

@@ -15,7 +15,6 @@ WORKDIR /app
 USER 1001:1001
 COPY --from=build /src/build/libs/*.jar /app/app.jar
 ENV JAVA_OPTS=""
-ENV WEBSOCKET_API_TOKEN=""
 ENV OPEN_AI_API_KEY=""
 EXPOSE 8080
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]

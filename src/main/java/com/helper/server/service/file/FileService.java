@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -30,18 +31,18 @@ public class FileService extends AbstractService implements IFileService {
     }
 
     @Override
-    public void sendFile(MultipartFile file, String prompt) {
+    public void sendFile(Principal principal, MultipartFile file, String prompt) {
         try {
             byte[] fileBytes = file.getBytes();
             String base64 = Base64.getEncoder().encodeToString(fileBytes);
-            executeAiCall(List.of(base64), prompt);
+            executeAiCall(principal, List.of(base64), prompt);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
     @Override
-    public void sendFiles(List<MultipartFile> files, String prompt) {
+    public void sendFiles(Principal principal, List<MultipartFile> files, String prompt) {
         try {
             List<String> imagesB64 = files.stream()
                     .filter(f -> f != null && !f.isEmpty())
@@ -52,7 +53,7 @@ public class FileService extends AbstractService implements IFileService {
                 LOGGER.warn("sendFiles: no non-empty files received");
                 return;
             }
-            executeAiCall(imagesB64, prompt);
+            executeAiCall(principal, imagesB64, prompt);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -68,7 +69,7 @@ public class FileService extends AbstractService implements IFileService {
         }
     }
 
-    private void executeAiCall(List<String> imagesB64, String prompt) {
+    private void executeAiCall(Principal principal, List<String> imagesB64, String prompt) {
         long handle1 = System.currentTimeMillis();
         String jsonPayload = jsonTemplateService.buildJsonFilePayload(imagesB64, prompt);
         long timeDiff2 = System.currentTimeMillis() - handle1;
@@ -79,7 +80,7 @@ public class FileService extends AbstractService implements IFileService {
         long timeDiff3 = System.currentTimeMillis() - handle3;
         LOGGER.info("time gets {}", timeDiff3);
         long handle4 = System.currentTimeMillis();
-        wsHandler.broadcast(response);
+        wsHandler.broadcastToUser(principal.getName(), response);
         long timeDiff4 = System.currentTimeMillis() - handle4;
         LOGGER.info("time gets {}", timeDiff4);
     }

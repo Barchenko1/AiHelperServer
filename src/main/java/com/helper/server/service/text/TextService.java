@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
+
 import static com.helper.server.unil.Constant.LANGUAGE_TEXT;
 
 @Service
@@ -26,9 +28,8 @@ public class TextService extends AbstractService implements ITextService {
     }
 
     @Override
-    public void sendText(ExtensionPayload payload) {
-        String subPayload = payload.getText().substring(0, 50) + "...";
-
+    public void sendText(Principal principal, ExtensionPayload payload) {
+        String subPayload = payload.getText().length() > 50 ? payload.getText().substring(0, 50): payload.getText();
         LOGGER.info("Received from extension: {}", subPayload);
         long handle3 = System.currentTimeMillis();
         String sanitizedBody = payload.getText()
@@ -40,7 +41,7 @@ public class TextService extends AbstractService implements ITextService {
         long timeDiff3 = System.currentTimeMillis() - handle3;
         LOGGER.info("time gets response {}", timeDiff3);
         long handle4 = System.currentTimeMillis();
-        wsHandler.broadcast(response);
+        wsHandler.broadcastToUser(principal.getName(), response);
         long timeDiff4 = System.currentTimeMillis() - handle4;
         LOGGER.info("time gets socket {}", timeDiff4);
     }

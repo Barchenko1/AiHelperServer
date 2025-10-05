@@ -1,24 +1,15 @@
 package com.helper.server.config;
 
+import com.helper.server.interseptor.CodeOrJwtWsInterceptor;
+import com.helper.server.util.JwtUtil;
+import com.helper.server.util.CodeToTokenService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.server.HandshakeInterceptor;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-
-import java.util.List;
-import java.util.Map;
 
 @Configuration
 @EnableWebSocket
@@ -27,58 +18,21 @@ public class WebSocketSecureConfig implements WebSocketConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketSecureConfig.class);
 
     private final WSHandler handler;
-    private final String webSocketSecret;
+    private final JwtUtil jwtUtil;
+    private final CodeToTokenService codeToTokenService;
 
-    public WebSocketSecureConfig(WSHandler handler, @Value("${WEBSOCKET_API_TOKEN}") String webSocketSecret) {
+    public WebSocketSecureConfig(WSHandler handler,
+                                 JwtUtil jwtUtil,
+                                 CodeToTokenService codeToTokenService) {
         this.handler = handler;
-        this.webSocketSecret = webSocketSecret;
-    }
-
-    @Bean
-    public DefaultHandshakeHandler handshakeHandler() {
-        return new DefaultHandshakeHandler() {
-            private String determineSubProtocol(java.util.List<String> requested, WebSocketHandler handler) {
-                return (requested == null || requested.isEmpty()) ? null : requested.get(0);
-            }
-        };
+        this.jwtUtil = jwtUtil;
+        this.codeToTokenService = codeToTokenService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(handler, "/ws")
-                .setHandshakeHandler(handshakeHandler())
-                .addInterceptors(new SecretSubprotocolInterceptor(webSocketSecret))
+                .addInterceptors(new CodeOrJwtWsInterceptor(jwtUtil, codeToTokenService))
                 .setAllowedOriginPatterns("*");
     }
-
-    private static class SecretSubprotocolInterceptor implements HandshakeInterceptor {
-        private final String secret;
-        SecretSubprotocolInterceptor(String secret) { this.secret = secret; }
-
-        @Override
-        public boolean beforeHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
-                                       @NonNull WebSocketHandler wsHandler, @NonNull Map<String, Object> attributes) {
-            List<String> protocolList = request.getHeaders().get("Sec-WebSocket-Protocol");
-            String token = (protocolList != null && !protocolList.isEmpty()) ? protocolList.get(0) : null;
-
-            if (!validateToken(token)) {
-                return false;
-            }
-
-            response.getHeaders().add("Sec-WebSocket-Protocol", token);
-
-            attributes.put("authorized", true);
-            return true;
-        }
-
-        @Override
-        public void afterHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
-                                   @NonNull WebSocketHandler wsHandler, Exception ex) {
-        }
-
-        boolean validateToken(String token) {
-            return secret.equals(token);
-        }
-    }
-
 }
