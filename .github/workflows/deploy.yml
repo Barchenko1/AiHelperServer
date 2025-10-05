@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: packaged-application
-          path: artifact/*.jar
+          path: build/libs/*.jar
 
   deploy:
     needs: build
@@ -62,7 +62,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: packaged-application
-          path: artifact/
+          path: build/libs/
 
       - name: Setup key
         id: setup-key
@@ -78,7 +78,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ec2-user
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "artifact/*.jar"
+          source: "build/libs/*.jar"
           target: "/home/ec2-user/deployment/"
 
       - name: Write env file on EC2
