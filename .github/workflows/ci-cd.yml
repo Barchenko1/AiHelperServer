@@ -58,28 +58,28 @@ jobs:
       # >>> Added step: inject 3 app secrets into systemd drop-in and reload <<<
       - name: Update service env on EC2 (3 app secrets)
         run: |
-          SERVICE="AiHelperServer"   # your systemd unit (without .service)
+          SERVICE="AiHelperServer"
           ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "\
-            set -euo pipefail; \
-            sudo mkdir -p /etc/systemd/system/${SERVICE}.service.d && \
-            sudo bash -lc 'cat > /etc/systemd/system/'${SERVICE}'.service.d/override.conf <<EOF
-            [Service]
-            Environment=APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
-            Environment=APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
-            Environment=OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
-            Environment=SPRING_PROFILES_ACTIVE=prod
-            EOF
-            ' && \
-            sudo systemctl daemon-reload \
-            "
+          set -euo pipefail; \
+          sudo mkdir -p /etc/systemd/system/${SERVICE}.service.d && \
+          sudo bash -lc 'cat > /etc/systemd/system/'${SERVICE}'.service.d/override.conf <<EOF
+          [Service]
+          Environment=APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
+          Environment=APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
+          Environment=OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
+          Environment=SPRING_PROFILES_ACTIVE=prod
+          EOF
+          ' && \
+          sudo systemctl daemon-reload \
+          "
           
-          - name: Restart service on EC2
-            run: |
-              SERVICE="AiHelperServer"            # <-- change to your systemd unit (without .service)
-              REMOTE_DIR="/home/ec2-user/deployment/artifact"
-              ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "\
-                sudo systemctl stop ${SERVICE}.service || true && \
-                sudo systemctl daemon-reload || true && \
-                sudo systemctl start ${SERVICE}.service && \
-                sudo systemctl status ${SERVICE}.service --no-pager -l \
-              "
+      - name: Restart service on EC2
+        run: |
+          SERVICE="AiHelperServer"            # <-- change to your systemd unit (without .service)
+          REMOTE_DIR="/home/ec2-user/deployment/artifact"
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "\
+            sudo systemctl stop ${SERVICE}.service || true && \
+            sudo systemctl daemon-reload || true && \
+            sudo systemctl start ${SERVICE}.service && \
+            sudo systemctl status ${SERVICE}.service --no-pager -l \
+          "
