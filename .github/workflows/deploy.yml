@@ -85,14 +85,15 @@ jobs:
             cd /home/ec2-user/deployment
             # pick the first/only jar and move to the expected name
             LATEST_JAR=$(ls -t *.jar | head -n 1)
-            mv -f "$LATEST_JAR" spring-boot-app.jar
-            sudo chown ec2-user:ec2-user spring-boot-app.jar
+            echo "Activating: ${LATEST_JAR}"
+            sudo chown ec2-user:ec2-user "$LATEST_JAR"
+            chmod 0644 "$LATEST_JAR"
 
             # write/update env file (adjust secrets as needed)
             sudo bash -c 'cat > /etc/spring-boot-app.env <<EOF
             APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
             APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
-            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
             EOF'
 
       - name: Restart service
