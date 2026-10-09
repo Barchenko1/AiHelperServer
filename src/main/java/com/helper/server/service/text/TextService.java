@@ -21,7 +21,7 @@ public class TextService extends AbstractService implements ITextService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextService.class);
 
     @Autowired
-    public TextService(@Qualifier("openAITextClient") IOpenAIClient openAIClient,
+    public TextService(@Qualifier("aiTextClient") IOpenAIClient openAIClient,
                             IJsonTemplateService jsonTemplateService,
                             WSHandler wsHandler) {
         super(openAIClient, jsonTemplateService, wsHandler);

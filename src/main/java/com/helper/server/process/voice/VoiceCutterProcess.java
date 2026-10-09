@@ -25,7 +25,7 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
 
     @Autowired
     public VoiceCutterProcess(IOpenAITranscribeClient transcribeClient,
-                             @Qualifier("openAITextClient") IOpenAIClient openAIClient,
+                             @Qualifier("aiTextClient") IOpenAIClient openAIClient,
                              IJsonTemplateService jsonTemplateService,
                              WSHandler wsHandler) {
         this.transcribeClient = transcribeClient;

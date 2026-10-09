@@ -24,7 +24,7 @@ public class FileService extends AbstractService implements IFileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
 
     @Autowired
-    public FileService(@Qualifier("openAIScreenClient") IOpenAIClient openAIClient,
+    public FileService(@Qualifier("aiScreenClient") IOpenAIClient openAIClient,
                        IJsonTemplateService jsonTemplateService,
                        WSHandler wsHandler) {
         super(openAIClient, jsonTemplateService, wsHandler);
