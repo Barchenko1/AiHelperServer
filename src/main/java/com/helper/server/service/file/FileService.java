@@ -1,6 +1,6 @@
 package com.helper.server.service.file;
 
-import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.client.IAIClient;
 import com.helper.server.service.AbstractService;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
@@ -24,10 +24,10 @@ public class FileService extends AbstractService implements IFileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
 
     @Autowired
-    public FileService(@Qualifier("aiScreenClient") IOpenAIClient openAIClient,
+    public FileService(@Qualifier("aiScreenClient") IAIClient gptClient,
                        IJsonTemplateService jsonTemplateService,
                        WSHandler wsHandler) {
-        super(openAIClient, jsonTemplateService, wsHandler);
+        super(gptClient, jsonTemplateService, wsHandler);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class FileService extends AbstractService implements IFileService {
         LOGGER.info("time gets {}", timeDiff2);
 
         long handle3 = System.currentTimeMillis();
-        String response = openAIClient.sendToOpenAI(jsonPayload);
+        String response = gptClient.sendToAI(jsonPayload);
         long timeDiff3 = System.currentTimeMillis() - handle3;
         LOGGER.info("time gets {}", timeDiff3);
         long handle4 = System.currentTimeMillis();

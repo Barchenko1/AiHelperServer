@@ -11,10 +11,10 @@ import java.util.List;
 @Service
 public class JsonTemplateService implements IJsonTemplateService {
 
-    @Value(value = "${openAiModalVersion}")
-    private String openAiModalVersion;
-    @Value(value = "${openAiTokensSize}")
-    private Integer openAiTokensSize;
+    @Value(value = "${modalVersion}")
+    private String modalVersion;
+    @Value(value = "${tokensSize}")
+    private Integer tokensSize;
 
     @Override
     public String buildJsonTextPayload(String payload, String prompt) {
@@ -77,9 +77,9 @@ public class JsonTemplateService implements IJsonTemplateService {
         messages.add(user);
 
         JsonObject root = new JsonObject();
-        root.addProperty("model", openAiModalVersion);
+        root.addProperty("model", modalVersion);
         root.add("messages", messages);
-        root.addProperty("max_tokens", openAiTokensSize);
+        root.addProperty("max_tokens", tokensSize);
 
         return root;
     }

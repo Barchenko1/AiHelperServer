@@ -1,4 +1,4 @@
-package com.helper.server.client.openaiclient;
+package com.helper.server.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,7 +14,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public abstract class AbstractAIClient implements IOpenAIClient {
+public abstract class AbstractAIClient implements IAIClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAIClient.class);
     protected static final Gson GSON = new Gson();
@@ -22,7 +22,6 @@ public abstract class AbstractAIClient implements IOpenAIClient {
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 60_000;
 
-    /** Name used in error messages, e.g. "OpenAI" or "Claude". */
     protected abstract String providerName();
 
     protected abstract String apiUrl();
@@ -30,14 +29,13 @@ public abstract class AbstractAIClient implements IOpenAIClient {
     /** Auth and version headers; Content-Type is added by the base class. */
     protected abstract Map<String, String> requestHeaders();
 
-    /** Converts the OpenAI-style payload into this provider's request body. */
-    protected abstract String buildRequestBody(String openAiJson);
+    protected abstract String buildRequestBody(String json);
 
     /** Pulls the answer text out of a successful response. */
     protected abstract String extractText(JsonObject response) throws IOException;
 
     @Override
-    public String sendToOpenAI(String json) {
+    public String sendToAI(String json) {
         try {
             HttpURLConnection connection = openConnection();
 

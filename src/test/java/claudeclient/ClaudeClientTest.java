@@ -75,7 +75,7 @@ class ClaudeClientTest {
 
     @Test
     void sendsAuthHeadersAndUsesConfiguredModelAndTokens() {
-        client.sendToOpenAI(textPayload("code", "solve"));
+        client.sendToAI(textPayload("code", "solve"));
 
         assertThat(seenHeaders.get().getFirst("x-api-key")).isEqualTo("sk-ant-test");
         assertThat(seenHeaders.get().getFirst("anthropic-version")).isEqualTo("2023-06-01");
@@ -87,7 +87,7 @@ class ClaudeClientTest {
 
     @Test
     void forwardsTextPartsAsSingleUserMessage() {
-        client.sendToOpenAI(textPayload("some page text", "solve it"));
+        client.sendToAI(textPayload("some page text", "solve it"));
 
         JsonArray messages = sentRequest().getAsJsonArray("messages");
         assertThat(messages).hasSize(1);
@@ -101,7 +101,7 @@ class ClaudeClientTest {
 
     @Test
     void convertsDataUrlImageToClaudeImageBlock() {
-        client.sendToOpenAI(imagePayload("data:image/jpeg;base64,QUJD"));
+        client.sendToAI(imagePayload("data:image/jpeg;base64,QUJD"));
 
         JsonObject image = sentRequest().getAsJsonArray("messages").get(0).getAsJsonObject()
                 .getAsJsonArray("content").get(1).getAsJsonObject();
@@ -115,7 +115,7 @@ class ClaudeClientTest {
 
     @Test
     void rawBase64DefaultsToPng() {
-        client.sendToOpenAI(imagePayload("iVBORw0KGgo="));
+        client.sendToAI(imagePayload("iVBORw0KGgo="));
 
         JsonObject source = firstImageSource();
         assertThat(source.get("media_type").getAsString()).isEqualTo("image/png");
@@ -124,7 +124,7 @@ class ClaudeClientTest {
 
     @Test
     void rawBase64JpegIsDetectedBySignature() {
-        client.sendToOpenAI(imagePayload("/9j/4AAQSkZJRg=="));
+        client.sendToAI(imagePayload("/9j/4AAQSkZJRg=="));
 
         assertThat(firstImageSource().get("media_type").getAsString()).isEqualTo("image/jpeg");
     }
@@ -138,7 +138,7 @@ class ClaudeClientTest {
     void returnsAnswerAsJsonEncodedString() {
         responseBody = "{\"content\":[{\"type\":\"text\",\"text\":\"line1\\n\\\"quoted\\\"\"}]}";
 
-        String result = client.sendToOpenAI(textPayload("a", "b"));
+        String result = client.sendToAI(textPayload("a", "b"));
 
         assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("line1\n\"quoted\"");
     }
@@ -148,7 +148,7 @@ class ClaudeClientTest {
         responseBody = "{\"content\":[{\"type\":\"text\",\"text\":\"Hello \"},"
                 + "{\"type\":\"thinking\",\"thinking\":\"hidden\"},{\"type\":\"text\",\"text\":\"world\"}]}";
 
-        String result = client.sendToOpenAI(textPayload("a", "b"));
+        String result = client.sendToAI(textPayload("a", "b"));
 
         assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("Hello world");
     }
@@ -158,7 +158,7 @@ class ClaudeClientTest {
         status = 401;
         responseBody = "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"}}";
 
-        assertThatThrownBy(() -> client.sendToOpenAI(textPayload("a", "b")))
+        assertThatThrownBy(() -> client.sendToAI(textPayload("a", "b")))
                 .isInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage("Claude API error 401: " + JsonParser.parseString(responseBody));
     }
@@ -167,7 +167,7 @@ class ClaudeClientTest {
     void throwsWhenServerIsUnreachable() {
         server.stop(0);
 
-        assertThatThrownBy(() -> client.sendToOpenAI(textPayload("a", "b")))
+        assertThatThrownBy(() -> client.sendToAI(textPayload("a", "b")))
                 .isInstanceOf(RuntimeException.class);
     }
 }

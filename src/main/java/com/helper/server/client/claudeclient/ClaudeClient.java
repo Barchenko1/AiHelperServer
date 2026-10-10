@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.helper.server.client.openaiclient.AbstractAIClient;
+import com.helper.server.client.AbstractAIClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class ClaudeClient extends AbstractAIClient {
     @Value("${claudeModelVersion}")
     private String model;
 
-    @Value("${openAiTokensSize}")
+    @Value("${tokensSize}")
     private Integer maxTokens;
 
     @Override
@@ -46,8 +46,8 @@ public class ClaudeClient extends AbstractAIClient {
     }
 
     @Override
-    protected String buildRequestBody(String openAiJson) {
-        return toClaudeRequest(openAiJson);
+    protected String buildRequestBody(String json) {
+        return toClaudeRequest(json);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class ClaudeClient extends AbstractAIClient {
         return text.toString();
     }
 
-    private String toClaudeRequest(String openAiJson) {
-        JsonObject in = JsonParser.parseString(openAiJson).getAsJsonObject();
+    private String toClaudeRequest(String json) {
+        JsonObject in = JsonParser.parseString(json).getAsJsonObject();
 
         JsonArray content = new JsonArray();
         for (JsonElement msg : in.getAsJsonArray("messages")) {

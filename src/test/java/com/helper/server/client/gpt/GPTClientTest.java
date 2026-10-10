@@ -1,4 +1,4 @@
-package com.helper.server.client.openaiclient;
+package com.helper.server.client.gpt;
 
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
@@ -53,7 +53,7 @@ class GPTClientTest {
     void sendsPayloadUnchangedWithBearerAuth() {
         String payload = "{\"model\":\"gpt-4o\",\"messages\":[]}";
 
-        client.sendToOpenAI(payload);
+        client.sendToAI(payload);
 
         assertThat(seenBody.get()).isEqualTo(payload);
         assertThat(seenHeaders.get().getFirst("Authorization")).isEqualTo("Bearer sk-test");
@@ -64,26 +64,26 @@ class GPTClientTest {
     void returnsAnswerAsJsonEncodedString() {
         responseBody = "{\"choices\":[{\"message\":{\"content\":\"a \\\"b\\\"\\nc\"}}]}";
 
-        String result = client.sendToOpenAI("{}");
+        String result = client.sendToAI("{}");
 
         assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("a \"b\"\nc");
     }
 
     @Test
-    void errorStatusThrowsWithOpenAiMessage() {
+    void errorStatusThrowsWithGPTMessage() {
         status = 429;
         responseBody = "{\"error\":{\"message\":\"You have no credits remaining.\",\"code\":\"credit_balance_exhausted\"}}";
 
-        assertThatThrownBy(() -> client.sendToOpenAI("{}"))
+        assertThatThrownBy(() -> client.sendToAI("{}"))
                 .isInstanceOf(RuntimeException.class)
-                .hasRootCauseMessage("OpenAI API error 429: " + responseBody);
+                .hasRootCauseMessage("GPT API error 429: " + responseBody);
     }
 
     @Test
     void successBodyWithoutChoicesThrowsInsteadOfNpe() {
         responseBody = "{\"unexpected\":true}";
 
-        assertThatThrownBy(() -> client.sendToOpenAI("{}"))
+        assertThatThrownBy(() -> client.sendToAI("{}"))
                 .isInstanceOf(RuntimeException.class)
                 .hasRootCauseInstanceOf(java.io.IOException.class);
     }

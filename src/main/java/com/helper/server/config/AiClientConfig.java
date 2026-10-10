@@ -1,7 +1,7 @@
 package com.helper.server.config;
 
 import com.google.gson.Gson;
-import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.client.IAIClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,20 +22,20 @@ public class AiClientConfig {
     private String defaultProvider;
 
     @Bean("aiTextClient")
-    public IOpenAIClient aiTextClient(@Qualifier("gptClient") IOpenAIClient openAi,
-                                      @Qualifier("claudeClient") IOpenAIClient claude) {
-        return json -> call(useClaude() ? claude : openAi, json);
+    public IAIClient aiTextClient(@Qualifier("gptClient") IAIClient gpt,
+                                  @Qualifier("claudeClient") IAIClient claude) {
+        return json -> call(useClaude() ? claude : gpt, json);
     }
 
     @Bean("aiScreenClient")
-    public IOpenAIClient aiScreenClient(@Qualifier("gptClient") IOpenAIClient openAi,
-                                        @Qualifier("claudeClient") IOpenAIClient claude) {
-        return json -> call(useClaude() ? claude : openAi, json);
+    public IAIClient aiScreenClient(@Qualifier("gptClient") IAIClient gpt,
+                                    @Qualifier("claudeClient") IAIClient claude) {
+        return json -> call(useClaude() ? claude : gpt, json);
     }
 
-    private String call(IOpenAIClient client, String json) {
+    private String call(IAIClient client, String json) {
         try {
-            return client.sendToOpenAI(json);
+            return client.sendToAI(json);
         } catch (RuntimeException e) {
             LOGGER.error("AI call failed", e);
             Throwable root = e;

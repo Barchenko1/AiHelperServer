@@ -1,13 +1,13 @@
-package com.helper.server.client.openaiclient;
+package com.helper.server.client.gpt;
 
 import com.google.gson.JsonObject;
+import com.helper.server.client.AbstractAIClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Map;
 
-/** Sends text and screenshot (image_url) chat payloads to the OpenAI completions API. */
 @Service("gptClient")
 public class GPTClient extends AbstractAIClient {
 
@@ -33,8 +33,8 @@ public class GPTClient extends AbstractAIClient {
     }
 
     @Override
-    protected String buildRequestBody(String openAiJson) {
-        return openAiJson;
+    protected String buildRequestBody(String json) {
+        return json;
     }
 
     @Override

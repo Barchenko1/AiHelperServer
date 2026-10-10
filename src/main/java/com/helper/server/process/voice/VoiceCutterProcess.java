@@ -1,7 +1,7 @@
 package com.helper.server.process.voice;
 
-import com.helper.server.client.openaiclient.IOpenAIClient;
-import com.helper.server.client.openaiclient.wisper.ITranscribeClient;
+import com.helper.server.client.IAIClient;
+import com.helper.server.client.gpt.wisper.ITranscribeClient;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
@@ -20,16 +20,16 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
 
     private final ITranscribeClient transcribeClient;
     private final IJsonTemplateService jsonTemplateService;
-    private final IOpenAIClient openAIClient;
+    private final IAIClient gptClient;
     private final WSHandler wsHandler;
 
     @Autowired
     public VoiceCutterProcess(ITranscribeClient transcribeClient,
-                              @Qualifier("aiTextClient") IOpenAIClient openAIClient,
+                              @Qualifier("aiTextClient") IAIClient gptClient,
                               IJsonTemplateService jsonTemplateService,
                               WSHandler wsHandler) {
         this.transcribeClient = transcribeClient;
-        this.openAIClient = openAIClient;
+        this.gptClient = gptClient;
         this.jsonTemplateService = jsonTemplateService;
         this.wsHandler = wsHandler;
     }
@@ -40,22 +40,22 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
             wsHandler.broadcastToUser(principal.getName(), "No voice file provided");
         } else {
             wsHandler.broadcastToUser(principal.getName(),"Processing...");
-            sendToOpenAITranscript(principal, file, prompt);
+            sendToGPTTranscript(principal, file, prompt);
         }
     }
 
-    private void sendToOpenAITranscript(Principal principal, MultipartFile multipartFile, String prompt) {
-        String transcript = transcribeClient.transcribeWithOpenAI(multipartFile);
-        sendToOpenAI(principal, transcript, prompt);
+    private void sendToGPTTranscript(Principal principal, MultipartFile multipartFile, String prompt) {
+        String transcript = transcribeClient.transcribeWithGPT(multipartFile);
+        sendToGPT(principal, transcript, prompt);
 
     }
 
-    private void sendToOpenAI(Principal principal, String transcript, String prompt) {
+    private void sendToGPT(Principal principal, String transcript, String prompt) {
         if (transcript != null && !transcript.isEmpty()) {
             LOGGER.info("✅ Final Transcript: {}", transcript);
             String jsonPayload = jsonTemplateService.buildJsonTextPayload(transcript, prompt);
             LOGGER.info(jsonPayload);
-            String response = openAIClient.sendToOpenAI(jsonPayload);
+            String response = gptClient.sendToAI(jsonPayload);
             wsHandler.broadcastToUser(principal.getName(), response);
         } else {
             LOGGER.info("⚠️ No speech detected.");

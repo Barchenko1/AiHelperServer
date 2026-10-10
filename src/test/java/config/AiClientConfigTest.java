@@ -1,7 +1,7 @@
 package config;
 
 import com.google.gson.JsonParser;
-import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.client.IAIClient;
 import com.helper.server.config.AiClientConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiClientConfigTest {
 
-    private static final IOpenAIClient OPENAI = json -> "\"openai-answer\"";
-    private static final IOpenAIClient CLAUDE = json -> "\"claude-answer\"";
+    private static final IAIClient GPT = json -> "\"gpt-answer\"";
+    private static final IAIClient CLAUDE = json -> "\"claude-answer\"";
 
     @AfterEach
     void clearRequest() {
@@ -37,58 +37,58 @@ class AiClientConfigTest {
     @Test
     void headerClaudeRoutesToClaude() {
         requestWithHeader("claude");
-        assertThat(config("openai").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"claude-answer\"");
+        assertThat(config("openai").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"claude-answer\"");
     }
 
     @Test
-    void headerOpenAiRoutesToOpenAiEvenWhenDefaultIsClaude() {
+    void headerOpenAiRoutesToGPTEvenWhenDefaultIsClaude() {
         requestWithHeader("openai");
-        assertThat(config("claude").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"openai-answer\"");
+        assertThat(config("claude").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"gpt-answer\"");
     }
 
     @Test
     void headerIsCaseAndWhitespaceInsensitive() {
         requestWithHeader("  CLAUDE ");
-        assertThat(config("openai").aiScreenClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"claude-answer\"");
+        assertThat(config("openai").aiScreenClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"claude-answer\"");
     }
 
     @Test
     void missingHeaderFallsBackToClaudeDefault() {
         requestWithHeader(null);
-        assertThat(config("claude").aiScreenClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"claude-answer\"");
+        assertThat(config("claude").aiScreenClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"claude-answer\"");
     }
 
     @Test
     void blankHeaderFallsBackToDefault() {
         requestWithHeader("   ");
-        assertThat(config("claude").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"claude-answer\"");
+        assertThat(config("claude").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"claude-answer\"");
     }
 
     @Test
     void missingHeaderUsesOpenAiWhenThatIsTheConfiguredDefault() {
         requestWithHeader(null);
-        assertThat(config("openai").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"openai-answer\"");
+        assertThat(config("openai").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"gpt-answer\"");
     }
 
     @Test
     void unknownProviderValueIsNotClaude() {
         requestWithHeader("gemini");
-        assertThat(config("claude").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"openai-answer\"");
+        assertThat(config("claude").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"gpt-answer\"");
     }
 
     @Test
     void usesDefaultWhenCalledOutsideARequest() {
-        assertThat(config("claude").aiTextClient(OPENAI, CLAUDE).sendToOpenAI("{}")).isEqualTo("\"claude-answer\"");
+        assertThat(config("claude").aiTextClient(GPT, CLAUDE).sendToAI("{}")).isEqualTo("\"claude-answer\"");
     }
 
     @Test
     void providerFailureBecomesReadableMessageForTheUi() {
         requestWithHeader("claude");
-        IOpenAIClient failing = json -> {
+        IAIClient failing = json -> {
             throw new RuntimeException(new java.io.IOException("Claude API error 429: no credits"));
         };
 
-        String result = config("claude").aiScreenClient(OPENAI, failing).sendToOpenAI("{}");
+        String result = config("claude").aiScreenClient(GPT, failing).sendToAI("{}");
 
         assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("⚠️ AI error: Claude API error 429: no credits");
     }

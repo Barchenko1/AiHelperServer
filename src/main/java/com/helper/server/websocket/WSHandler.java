@@ -38,8 +38,8 @@ public class WSHandler extends TextWebSocketHandler {
             return;
         }
         userSessionRegistry.getUsernameSessionsMap().computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(session);
-        LOGGER.info("🚀 WS open: id={}, user={}, remote={}, protocol={}",
-                session.getId(), userId, session.getRemoteAddress(), session.getAcceptedProtocol());
+        LOGGER.info("🚀 WS open: id={}, user={}, remote={}",
+                session.getId(), userId, session.getRemoteAddress());
 
         CopyOnWriteArrayList<String> history = userSessionRegistry.getHistoryMessages(userId);
         if (history != null && session.isOpen()) {

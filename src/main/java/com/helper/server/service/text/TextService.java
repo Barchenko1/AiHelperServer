@@ -1,7 +1,7 @@
 package com.helper.server.service.text;
 
 import com.helper.server.entity.ExtensionPayload;
-import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.client.IAIClient;
 import com.helper.server.service.AbstractService;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
@@ -21,10 +21,10 @@ public class TextService extends AbstractService implements ITextService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextService.class);
 
     @Autowired
-    public TextService(@Qualifier("aiTextClient") IOpenAIClient openAIClient,
+    public TextService(@Qualifier("aiTextClient") IAIClient gptClient,
                             IJsonTemplateService jsonTemplateService,
                             WSHandler wsHandler) {
-        super(openAIClient, jsonTemplateService, wsHandler);
+        super(gptClient, jsonTemplateService, wsHandler);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TextService extends AbstractService implements ITextService {
                 .replace("\"", "\\\"");
         String completePrompt = payload.getPrompt() + " " + LANGUAGE_TEXT.formatted(payload.getLanguage());
         String jsonPayload = jsonTemplateService.buildJsonTextPayload(sanitizedBody, completePrompt);
-        String response = openAIClient.sendToOpenAI(jsonPayload);
+        String response = gptClient.sendToAI(jsonPayload);
         long timeDiff3 = System.currentTimeMillis() - handle3;
         LOGGER.info("time gets response {}", timeDiff3);
         long handle4 = System.currentTimeMillis();

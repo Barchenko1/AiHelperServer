@@ -1,4 +1,4 @@
-package com.helper.server.client.openaiclient.wisper;
+package com.helper.server.client.gpt.wisper;
 
 import com.google.gson.JsonParser;
 import lombok.NonNull;
@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,12 +25,12 @@ public class GPTTranscribeClient implements ITranscribeClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GPTTranscribeClient.class);
     @Value(value = "${GPT_API_KEY}")
-    protected String openAiApiKey;
+    protected String apiKey;
     @Value(value = "${openai.api.url.transcriptions}")
     private String transcriptionApiUrl;
 
     @Override
-    public String transcribeWithOpenAI(@NonNull MultipartFile file) {
+    public String transcribeWithGPT(@NonNull MultipartFile file) {
         String boundary = "----OpenAIFormBoundary" + System.currentTimeMillis();
         HttpURLConnection conn = null;
 
@@ -43,7 +41,7 @@ public class GPTTranscribeClient implements ITranscribeClient {
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(60000);
-            conn.setRequestProperty("Authorization", "Bearer " + openAiApiKey);
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
@@ -91,75 +89,15 @@ public class GPTTranscribeClient implements ITranscribeClient {
                         .get("text")
                         .getAsString();
             } else {
-                LOGGER.error("❌ OpenAI transcribe failed: {} {}", code, body);
+                LOGGER.error("❌ GPT transcribe failed: {} {}", code, body);
                 return null;
             }
 
         } catch (IOException e) {
-            LOGGER.error("❌ Error calling OpenAI: {}", e.toString());
+            LOGGER.error("❌ Error calling GPT: {}", e.toString());
             return null;
         } finally {
             if (conn != null) conn.disconnect();
-        }
-    }
-
-    @Override
-    public String transcribeWithOpenAI(File file) {
-        try {
-            String boundary = "----OpenAIFormBoundary" + System.currentTimeMillis();
-
-            URL url = new URL(transcriptionApiUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", "Bearer " + openAiApiKey);
-            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-            try (OutputStream out = conn.getOutputStream();
-                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8), true)) {
-
-                writer.append("--").append(boundary).append("\r\n");
-                writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n");
-                writer.append("Content-Type: audio/wav\r\n\r\n").flush();
-                try (FileInputStream inputStream = new FileInputStream(file)) {
-                    inputStream.transferTo(out);
-                }
-                out.flush();
-                writer.append("\r\n").flush();
-
-                writer.append("--").append(boundary).append("\r\n");
-                writer.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n");
-                writer.append("whisper-1").append("\r\n").flush();
-
-                writer.append("--").append(boundary).append("\r\n");
-                writer.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n");
-                writer.append("en").append("\r\n").flush();
-
-                writer.append("--").append(boundary).append("--").append("\r\n").flush();
-            }
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        response.append(line);
-                    }
-                    return JsonParser
-                            .parseString(response.toString())
-                            .getAsJsonObject()
-                            .get("text")
-                            .getAsString();
-                }
-            } else {
-                LOGGER.error("❌ OpenAI API failed: {}", responseCode);
-                return null;
-            }
-
-        } catch (IOException e) {
-            LOGGER.error("❌ Error sending to OpenAI: {}", e.getMessage());
-            return null;
         }
     }
 }
