@@ -15,7 +15,7 @@ WORKDIR /app
 USER 1001:1001
 COPY --from=build /src/build/libs/*.jar /app/app.jar
 ENV JAVA_OPTS=""
-ENV OPEN_AI_API_KEY=""
+ENV GPT_API_KEY=""
 ENV ANTHROPIC_API_KEY=""
 ENV APP_JWT_SECRET=""
 ENV APP_NOOP_SECRET=""

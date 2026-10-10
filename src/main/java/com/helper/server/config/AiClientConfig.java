@@ -11,11 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-/**
- * Chooses the LLM backend per request: the client (extension / CLI) sends X-AI-Provider (openai | claude);
- * without the header the server falls back to ai.provider (claude by default).
- * Controllers call the clients synchronously on the request thread.
- */
 @Configuration
 public class AiClientConfig {
 
@@ -27,18 +22,17 @@ public class AiClientConfig {
     private String defaultProvider;
 
     @Bean("aiTextClient")
-    public IOpenAIClient aiTextClient(@Qualifier("gptTextClient") IOpenAIClient openAi,
+    public IOpenAIClient aiTextClient(@Qualifier("gptClient") IOpenAIClient openAi,
                                       @Qualifier("claudeClient") IOpenAIClient claude) {
         return json -> call(useClaude() ? claude : openAi, json);
     }
 
     @Bean("aiScreenClient")
-    public IOpenAIClient aiScreenClient(@Qualifier("gptScreenClient") IOpenAIClient openAi,
+    public IOpenAIClient aiScreenClient(@Qualifier("gptClient") IOpenAIClient openAi,
                                         @Qualifier("claudeClient") IOpenAIClient claude) {
         return json -> call(useClaude() ? claude : openAi, json);
     }
 
-    /** Turns provider failures (no credits, bad key, ...) into a message the UI can show instead of a silent 5xx/401. */
     private String call(IOpenAIClient client, String json) {
         try {
             return client.sendToOpenAI(json);

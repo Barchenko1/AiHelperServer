@@ -26,7 +26,7 @@ import java.util.Optional;
 public class GPTTranscribeClient implements ITranscribeClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GPTTranscribeClient.class);
-    @Value(value = "${OPEN_AI_API_KEY}")
+    @Value(value = "${GPT_API_KEY}")
     protected String openAiApiKey;
     @Value(value = "${openai.api.url.transcriptions}")
     private String transcriptionApiUrl;

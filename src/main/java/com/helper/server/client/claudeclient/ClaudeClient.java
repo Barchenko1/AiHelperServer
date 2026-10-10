@@ -1,29 +1,18 @@
 package com.helper.server.client.claudeclient;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.helper.server.client.openaiclient.IOpenAIClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.helper.server.client.openaiclient.AbstractAIClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Service("claudeClient")
-public class ClaudeClient implements IOpenAIClient {
+public class ClaudeClient extends AbstractAIClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClaudeClient.class);
-    private static final Gson GSON = new Gson();
     private static final String DATA_PREFIX = "data:";
 
     @Value("${ANTHROPIC_API_KEY:}")
@@ -42,40 +31,35 @@ public class ClaudeClient implements IOpenAIClient {
     private Integer maxTokens;
 
     @Override
-    public String sendToOpenAI(String json) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(messagesApiUrl).openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setConnectTimeout(15000);
-            connection.setReadTimeout(60000);
-            connection.setRequestProperty("x-api-key", apiKey);
-            connection.setRequestProperty("anthropic-version", apiVersion);
-            connection.setRequestProperty("Content-Type", "application/json");
+    protected String providerName() {
+        return "Claude";
+    }
 
-            try (OutputStream os = connection.getOutputStream()) {
-                os.write(toClaudeRequest(json).getBytes(StandardCharsets.UTF_8));
-            }
+    @Override
+    protected String apiUrl() {
+        return messagesApiUrl;
+    }
 
-            int code = connection.getResponseCode();
-            InputStream stream = (code >= 200 && code < 300) ? connection.getInputStream() : connection.getErrorStream();
-            JsonObject response = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
-            if (code < 200 || code >= 300) {
-                throw new IOException("Claude API error " + code + ": " + response);
-            }
+    @Override
+    protected Map<String, String> requestHeaders() {
+        return Map.of("x-api-key", apiKey, "anthropic-version", apiVersion);
+    }
 
-            StringBuilder text = new StringBuilder();
-            for (JsonElement block : response.getAsJsonArray("content")) {
-                JsonObject b = block.getAsJsonObject();
-                if ("text".equals(b.get("type").getAsString())) {
-                    text.append(b.get("text").getAsString());
-                }
+    @Override
+    protected String buildRequestBody(String openAiJson) {
+        return toClaudeRequest(openAiJson);
+    }
+
+    @Override
+    protected String extractText(JsonObject response) {
+        StringBuilder text = new StringBuilder();
+        for (JsonElement block : response.getAsJsonArray("content")) {
+            JsonObject b = block.getAsJsonObject();
+            if ("text".equals(b.get("type").getAsString())) {
+                text.append(b.get("text").getAsString());
             }
-            return GSON.toJson(text.toString());
-        } catch (IOException e) {
-            LOGGER.error("❌ Error sending to Claude: {}", e.getMessage());
-            throw new RuntimeException(e);
         }
+        return text.toString();
     }
 
     private String toClaudeRequest(String openAiJson) {
