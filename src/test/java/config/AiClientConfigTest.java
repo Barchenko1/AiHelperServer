@@ -2,6 +2,7 @@ package config;
 
 import com.google.gson.JsonParser;
 import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.config.AiClientConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
