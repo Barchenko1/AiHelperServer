@@ -3,6 +3,7 @@ package com.helper.server.process.voice;
 import com.helper.server.client.IAIClient;
 import com.helper.server.client.gpt.wisper.ITranscribeClient;
 import com.helper.server.template.IJsonTemplateService;
+import com.helper.server.util.UiErrors;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,7 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
             wsHandler.broadcastToUser(principal.getName(), response);
         } else {
             LOGGER.info("⚠️ No speech detected.");
+            wsHandler.broadcastToUser(principal.getName(), UiErrors.toUiMessage("No speech detected in the recording."));
         }
     }
 

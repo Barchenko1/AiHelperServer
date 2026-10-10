@@ -1,7 +1,7 @@
 package com.helper.server.config;
 
-import com.google.gson.Gson;
 import com.helper.server.client.IAIClient;
+import com.helper.server.util.UiErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,9 +38,7 @@ public class AiClientConfig {
             return client.sendToAI(json);
         } catch (RuntimeException e) {
             LOGGER.error("AI call failed", e);
-            Throwable root = e;
-            while (root.getCause() != null) root = root.getCause();
-            return new Gson().toJson("⚠️ AI error: " + root.getMessage());
+            return UiErrors.toUiMessage(e);
         }
     }
 

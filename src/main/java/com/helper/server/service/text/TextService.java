@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 
-import static com.helper.server.unil.Constant.LANGUAGE_TEXT;
+import static com.helper.server.util.Constant.LANGUAGE_TEXT;
 
 @Service
 public class TextService extends AbstractService implements ITextService {

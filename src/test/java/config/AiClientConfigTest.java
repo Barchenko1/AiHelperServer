@@ -90,6 +90,6 @@ class AiClientConfigTest {
 
         String result = config("claude").aiScreenClient(GPT, failing).sendToAI("{}");
 
-        assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("⚠️ AI error: Claude API error 429: no credits");
+        assertThat(JsonParser.parseString(result).getAsString()).isEqualTo("⚠️ Claude API error 429: no credits");
     }
 }

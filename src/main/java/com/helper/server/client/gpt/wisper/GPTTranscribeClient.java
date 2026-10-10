@@ -76,8 +76,8 @@ public class GPTTranscribeClient implements ITranscribeClient {
 
             int code = conn.getResponseCode();
             InputStream is = code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream();
-            String body;
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String body = "";
+            if (is != null) try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 StringBuilder sb = new StringBuilder();
                 String line; while ((line = br.readLine()) != null) sb.append(line);
                 body = sb.toString();
@@ -90,12 +90,12 @@ public class GPTTranscribeClient implements ITranscribeClient {
                         .getAsString();
             } else {
                 LOGGER.error("❌ GPT transcribe failed: {} {}", code, body);
-                return null;
+                throw new IOException("GPT transcribe error " + code + ": " + body);
             }
 
         } catch (IOException e) {
             LOGGER.error("❌ Error calling GPT: {}", e.toString());
-            return null;
+            throw new RuntimeException(e);
         } finally {
             if (conn != null) conn.disconnect();
         }
