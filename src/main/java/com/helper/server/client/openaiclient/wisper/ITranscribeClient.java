@@ -4,7 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 
-public interface IOpenAITranscribeClient {
+public interface ITranscribeClient {
     String transcribeWithOpenAI(MultipartFile audioFile);
     String transcribeWithOpenAI(File audioFile);
 }
