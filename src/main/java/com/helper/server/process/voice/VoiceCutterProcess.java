@@ -1,7 +1,7 @@
 package com.helper.server.process.voice;
 
 import com.helper.server.client.openaiclient.IOpenAIClient;
-import com.helper.server.client.openaiclient.wisper.IOpenAITranscribeClient;
+import com.helper.server.client.openaiclient.wisper.IAITranscribeClient;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;
@@ -18,16 +18,16 @@ public class VoiceCutterProcess implements IVoiceCutterProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VoiceCutterProcess.class);
 
-    private final IOpenAITranscribeClient transcribeClient;
+    private final IAITranscribeClient transcribeClient;
     private final IJsonTemplateService jsonTemplateService;
     private final IOpenAIClient openAIClient;
     private final WSHandler wsHandler;
 
     @Autowired
-    public VoiceCutterProcess(IOpenAITranscribeClient transcribeClient,
-                             @Qualifier("aiTextClient") IOpenAIClient openAIClient,
-                             IJsonTemplateService jsonTemplateService,
-                             WSHandler wsHandler) {
+    public VoiceCutterProcess(IAITranscribeClient transcribeClient,
+                              @Qualifier("aiTextClient") IOpenAIClient openAIClient,
+                              IJsonTemplateService jsonTemplateService,
+                              WSHandler wsHandler) {
         this.transcribeClient = transcribeClient;
         this.openAIClient = openAIClient;
         this.jsonTemplateService = jsonTemplateService;

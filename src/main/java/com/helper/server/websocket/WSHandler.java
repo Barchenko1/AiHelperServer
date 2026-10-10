@@ -29,8 +29,7 @@ public class WSHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws IOException {
-        LOGGER.info("🚀 Open: id={}, remote={}, protocol={}",
-                session.getId(), session.getRemoteAddress(), session.getAcceptedProtocol());
+        LOGGER.info("🚀 Open: id={}, remote={}", session.getId(), session.getRemoteAddress());
         String userId = getUserId(session);
         userSessionRegistry.addSessionId(userId, session);
         if (userId == null || userId.isEmpty()) {

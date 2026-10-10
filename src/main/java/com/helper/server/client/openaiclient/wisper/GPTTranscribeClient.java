@@ -1,6 +1,7 @@
 package com.helper.server.client.openaiclient.wisper;
 
 import com.google.gson.JsonParser;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,16 +23,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Service
-public class OpenAITranscribeClient implements IOpenAITranscribeClient {
+public class GPTTranscribeClient implements IAITranscribeClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAITranscribeClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GPTTranscribeClient.class);
     @Value(value = "${OPEN_AI_API_KEY}")
     protected String openAiApiKey;
     @Value(value = "${openai.api.url.transcriptions}")
     private String transcriptionApiUrl;
 
     @Override
-    public String transcribeWithOpenAI(MultipartFile file) {
+    public String transcribeWithOpenAI(@NonNull MultipartFile file) {
         String boundary = "----OpenAIFormBoundary" + System.currentTimeMillis();
         HttpURLConnection conn = null;
 

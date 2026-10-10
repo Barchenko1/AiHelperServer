@@ -10,10 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-@Service("openAIScreenClient")
-public class OpenAIScreenClient extends AbstractOpenAiClient {
+@Service("gptScreenClient")
+public class GPTScreenClient extends AbstractAIClient {
 
-    public OpenAIScreenClient() {}
+    public GPTScreenClient() {}
 
     @Override
     public String sendToOpenAI(String json) {

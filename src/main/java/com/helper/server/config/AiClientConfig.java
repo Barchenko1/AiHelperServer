@@ -27,13 +27,13 @@ public class AiClientConfig {
     private String defaultProvider;
 
     @Bean("aiTextClient")
-    public IOpenAIClient aiTextClient(@Qualifier("openAITextClient") IOpenAIClient openAi,
+    public IOpenAIClient aiTextClient(@Qualifier("gptTextClient") IOpenAIClient openAi,
                                       @Qualifier("claudeClient") IOpenAIClient claude) {
         return json -> call(useClaude() ? claude : openAi, json);
     }
 
     @Bean("aiScreenClient")
-    public IOpenAIClient aiScreenClient(@Qualifier("openAIScreenClient") IOpenAIClient openAi,
+    public IOpenAIClient aiScreenClient(@Qualifier("gptScreenClient") IOpenAIClient openAi,
                                         @Qualifier("claudeClient") IOpenAIClient claude) {
         return json -> call(useClaude() ? claude : openAi, json);
     }

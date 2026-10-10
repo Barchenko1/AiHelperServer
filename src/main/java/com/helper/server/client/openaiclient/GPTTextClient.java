@@ -11,10 +11,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-@Service("openAITextClient")
-public class OpenAITextClient extends AbstractOpenAiClient {
+@Service("gptTextClient")
+public class GPTTextClient extends AbstractAIClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAITextClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GPTTextClient.class);
 
     @Override
     public String sendToOpenAI(String json) {
@@ -43,7 +43,7 @@ public class OpenAITextClient extends AbstractOpenAiClient {
                 return GSON.toJson(content);
             }
         } catch (Exception e) {
-            LOGGER.error("❌ Error sending to GPT: {}", e.getMessage());
+            LOGGER.error("❌ Error sending to AI: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public abstract class AbstractOpenAiClient implements IOpenAIClient {
+public abstract class AbstractAIClient implements IOpenAIClient {
     @Value(value = "${OPEN_AI_API_KEY}")
     protected String openAiApiKey;
 
