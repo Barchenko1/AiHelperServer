@@ -1,4 +1,4 @@
-package com.helper.server.openaiclient.wisper;
+package com.helper.server.client.openaiclient.wisper;
 
 import org.springframework.web.multipart.MultipartFile;
 

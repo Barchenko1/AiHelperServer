@@ -67,6 +67,7 @@ jobs:
           Environment=APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}
           Environment=APP_NOOP_SECRET=${{ secrets.APP_NOOP_SECRET }}
           Environment=OPEN_AI_API_KEY=${{ secrets.OPEN_AI_API_KEY }}
+          Environment=ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
           Environment=SPRING_PROFILES_ACTIVE=prod
           EOF
           ' && \

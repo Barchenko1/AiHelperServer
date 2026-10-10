@@ -1,6 +1,6 @@
 package com.helper.server.service;
 
-import com.helper.server.openaiclient.IOpenAIClient;
+import com.helper.server.client.openaiclient.IOpenAIClient;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;

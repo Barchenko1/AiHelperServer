@@ -1,4 +1,4 @@
-package com.helper.server.openaiclient;
+package com.helper.server.client.openaiclient;
 
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Value;

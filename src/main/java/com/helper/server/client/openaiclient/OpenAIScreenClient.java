@@ -1,4 +1,4 @@
-package com.helper.server.openaiclient;
+package com.helper.server.client.openaiclient;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -30,6 +30,10 @@ public class OpenAIScreenClient extends AbstractOpenAiClient {
                     : connection.getErrorStream();
 
             JsonObject jsonResponse = JsonParser.parseReader(new InputStreamReader(responseStream)).getAsJsonObject();
+
+            if (code < 200 || code >= 300 || !jsonResponse.has("choices")) {
+                throw new IOException("OpenAI API error " + code + ": " + jsonResponse);
+            }
 
             jsonResponse.addProperty("timestamp", System.currentTimeMillis());
 

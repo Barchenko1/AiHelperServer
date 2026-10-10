@@ -1,7 +1,7 @@
 package com.helper.server.service.text;
 
 import com.helper.server.entity.ExtensionPayload;
-import com.helper.server.openaiclient.IOpenAIClient;
+import com.helper.server.client.openaiclient.IOpenAIClient;
 import com.helper.server.service.AbstractService;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;

@@ -1,7 +1,7 @@
 package com.helper.server.process.voice;
 
-import com.helper.server.openaiclient.IOpenAIClient;
-import com.helper.server.openaiclient.wisper.IOpenAITranscribeClient;
+import com.helper.server.client.openaiclient.IOpenAIClient;
+import com.helper.server.client.openaiclient.wisper.IOpenAITranscribeClient;
 import com.helper.server.template.IJsonTemplateService;
 import com.helper.server.websocket.WSHandler;
 import org.slf4j.Logger;

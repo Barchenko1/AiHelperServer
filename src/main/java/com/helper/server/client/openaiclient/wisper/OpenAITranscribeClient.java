@@ -1,4 +1,4 @@
-package com.helper.server.openaiclient.wisper;
+package com.helper.server.client.openaiclient.wisper;
 
 import com.google.gson.JsonParser;
 import org.slf4j.Logger;

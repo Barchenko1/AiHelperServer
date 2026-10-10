@@ -1,4 +1,4 @@
-package com.helper.server.openaiclient;
+package com.helper.server.client.openaiclient;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
