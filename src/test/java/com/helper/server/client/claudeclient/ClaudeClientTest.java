@@ -1,4 +1,4 @@
-package claudeclient;
+package com.helper.server.client.claudeclient;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

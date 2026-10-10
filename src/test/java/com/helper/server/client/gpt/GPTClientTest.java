@@ -76,7 +76,7 @@ class GPTClientTest {
 
         assertThatThrownBy(() -> client.sendToAI("{}"))
                 .isInstanceOf(RuntimeException.class)
-                .hasRootCauseMessage("GPT API error 429: " + responseBody);
+                .hasRootCauseMessage("OpenAI API error 429: " + responseBody);
     }
 
     @Test
