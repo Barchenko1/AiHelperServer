@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Service
-public class GPTTranscribeClient implements IAITranscribeClient {
+public class GPTTranscribeClient implements ITranscribeClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GPTTranscribeClient.class);
     @Value(value = "${OPEN_AI_API_KEY}")
