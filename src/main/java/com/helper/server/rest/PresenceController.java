@@ -59,6 +59,7 @@ public class PresenceController {
         Map<String, Object> clients = new HashMap<>();
         clients.put(ClientPresenceRegistry.CLI, null);
         clients.put(ClientPresenceRegistry.EXTENSION, null);
+        clients.put(ClientPresenceRegistry.AUTO_SCREEN, null);
         if (valid) {
             clients.putAll(presence.secondsSinceSeen(auth.getName()));
         }

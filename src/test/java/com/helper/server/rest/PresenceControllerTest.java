@@ -76,7 +76,19 @@ class PresenceControllerTest {
         assertThat(status).containsEntry("session", true);
         Map<String, Object> clients = (Map<String, Object>) status.get("clients");
         assertThat(clients.get("extension")).isNotNull();
-        assertThat(clients).containsEntry("cli", null);
+        assertThat(clients).containsEntry("cli", null).containsEntry("autoscreen", null);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void autoScreenPingAndOfflineDriveItsOwnLight() {
+        var auth = loginAs("pbrchnk");
+
+        assertThat(controller.ping("autoscreen", auth).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat((Map<String, Object>) controller.status().get("clients")).extractingByKey("autoscreen").isNotNull();
+
+        assertThat(controller.offline("autoscreen", auth).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat((Map<String, Object>) controller.status().get("clients")).containsEntry("autoscreen", null);
     }
 
     @Test

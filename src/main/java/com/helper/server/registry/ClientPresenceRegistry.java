@@ -9,12 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Remembers when each client type (cli, extension) last checked in with a valid code, per user. */
+/** Remembers when each client type (cli, extension, autoscreen) last checked in with a valid code, per user. */
 @Component
 public class ClientPresenceRegistry {
 
     public static final String CLI = "cli";
     public static final String EXTENSION = "extension";
+    /** The CLI's F6 auto-screen loop: checks in after every screenshot it delivered. */
+    public static final String AUTO_SCREEN = "autoscreen";
 
     private final Map<String, Map<String, Instant>> lastSeen = new ConcurrentHashMap<>();
     private final Clock clock;
@@ -28,7 +30,7 @@ public class ClientPresenceRegistry {
     }
 
     public static boolean isKnownClient(String client) {
-        return CLI.equals(client) || EXTENSION.equals(client);
+        return CLI.equals(client) || EXTENSION.equals(client) || AUTO_SCREEN.equals(client);
     }
 
     public void record(String username, String client) {
