@@ -3,6 +3,7 @@ name: CI/CD Spring Boot → EC2
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:   # "Run workflow" button in the Actions tab
 
 jobs:
   build-and-deploy:
@@ -27,6 +28,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Test + coverage gate (85%)
+        run: ./gradlew check --no-daemon
 
       - name: Build JAR
         run: ./gradlew clean bootJar --no-daemon
