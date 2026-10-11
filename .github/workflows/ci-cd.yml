@@ -59,7 +59,6 @@ jobs:
           scp -i ~/.ssh/id_rsa "${{ steps.jar.outputs.jar }}" ec2-user@${{ secrets.DEPLOY_HOST }}:$REMOTE_DIR/app.jar.tmp
           ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.DEPLOY_HOST }} "mv $REMOTE_DIR/app.jar.tmp $REMOTE_DIR/app.jar"
 
-      # >>> Added step: inject 3 app secrets into systemd drop-in and reload <<<
       - name: Update service env on EC2 (3 app secrets)
         run: |
           SERVICE="AiHelperServer"
