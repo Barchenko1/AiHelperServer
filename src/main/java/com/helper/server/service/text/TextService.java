@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 
-import static com.helper.server.util.Constant.LANGUAGE_TEXT;
+import static com.helper.server.util.Constant.withLanguage;
 
 @Service
 public class TextService extends AbstractService implements ITextService {
@@ -35,7 +35,7 @@ public class TextService extends AbstractService implements ITextService {
         String sanitizedBody = payload.getText()
                 .replaceAll("\\s+", " ")
                 .replace("\"", "\\\"");
-        String completePrompt = payload.getPrompt() + " " + LANGUAGE_TEXT.formatted(payload.getLanguage());
+        String completePrompt = withLanguage(payload.getPrompt(), payload.getLanguage());
         String jsonPayload = jsonTemplateService.buildJsonTextPayload(sanitizedBody, completePrompt);
         String response = gptClient.sendToAI(jsonPayload);
         long timeDiff3 = System.currentTimeMillis() - handle3;

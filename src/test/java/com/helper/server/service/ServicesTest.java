@@ -44,8 +44,17 @@ class ServicesTest {
 
         verify(templates).buildJsonTextPayload(
                 "say \\\"hi\\\" there " + "x".repeat(60),
-                "Solve Write a clear and correct solution in Java. (write it) ");
+                "Solve Write a clear and correct solution in Java. (write it)");
         verify(ws).broadcastToUser("pa", "\"answer\"");
+    }
+
+    @Test
+    void languageNoneSendsOnlyThePrompt() {
+        when(templates.buildJsonTextPayload(anyString(), anyString())).thenReturn("{json}");
+
+        new TextService(ai, templates, ws).sendText(pa, new ExtensionPayload("code", "Explain this", "None"));
+
+        verify(templates).buildJsonTextPayload("code", "Explain this");
     }
 
     @Test
