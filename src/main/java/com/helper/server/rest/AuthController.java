@@ -23,6 +23,8 @@ import java.util.Map;
 @RequestMapping("/api/v1")
 public class AuthController {
 
+    public static final Duration TOKEN_TTL = Duration.ofHours(3);
+
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
     private final UserSessionRegistry sessions;
@@ -40,10 +42,9 @@ public class AuthController {
                                      @RequestParam String password) {
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
-        Duration ttl = Duration.ofHours(3);
         UserSession entry = sessions.getOrCreate(
                 auth.getName(),
-                ttl,
+                TOKEN_TTL,
                 t -> jwtUtil.issue(auth.getName(), t)
         );
         return Map.of(
