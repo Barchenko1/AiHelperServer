@@ -6,7 +6,7 @@ on:
   workflow_dispatch:   # "Run workflow" button in the Actions tab
 
 jobs:
-  build-and-deploy:
+  deploy-to-aws:
     runs-on: ubuntu-latest
 
     steps:
