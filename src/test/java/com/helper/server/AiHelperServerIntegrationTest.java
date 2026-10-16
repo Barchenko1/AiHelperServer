@@ -63,6 +63,23 @@ class AiHelperServerIntegrationTest {
     }
 
     @Test
+    void secondBrowserJoinsWithTheCodeWithoutAPassword() throws Exception {
+        JsonObject session = login();
+
+        mvc.perform(post("/api/v1/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("code", session.get("code").getAsString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value(session.get("token").getAsString()))
+                .andExpect(jsonPath("$.expiresAt").value(session.get("expiresAt").getAsString()));
+
+        mvc.perform(post("/api/v1/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("code", "000000"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void wrongPasswordIsRejected() throws Exception {
         mvc.perform(post("/api/v1/login")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
